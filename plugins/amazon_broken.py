@@ -16,16 +16,16 @@ def amazon_url(match):
     title = item.xpath('//title/text()')[0]
     try: price = item.xpath("//span[@id='priceblock_ourprice']/text()")[0]
     except: price = "$?"
-    rating = item.xpath("//div[@id='avgRating']/span/text()")[0].strip()
-
+    rating = item.xpath("//span[@id='acrPopover']/@title")[0]
     star_count = round(float(rating.split(' ')[0]),0)
     stars=""
     for x in xrange(0,int(star_count)):
         stars = "{}{}".format(stars,'★')
     for y in xrange(int(star_count),5):
         stars = "{}{}".format(stars,'☆')
-
-    try: return ('\x02{}\x02 - \x02{}\x02 - \x034{}\x034'.format(title, stars, price)).decode('utf-8')
+    raw_rate = float(rating.split(' ')[0])
+    readable_rate = "{}/5".format(raw_rate)
+    try: return ('\x02{}\x02 - \x02{}\x02 {} - \x034{}\x034'.format(title, stars,readable_rate, price)).decode('utf-8')
     except: return http.process_text('\x02{}\x02 - \x02{}\x02 - \x034{}\x034'.format(title, stars, price))
 
 
