@@ -1,24 +1,29 @@
 import os
 import re
 import time
+import socket
 from util import hook
 
+
+# TODO: make this autodetect either google-chrome or chromium-browser
+CHROME_CMD = 'google-chrome'
+HOSTNAME = socket.gethostname()
 MRSKELTAL = ['▒▒▒░░░░░░░░░░▄▐░░░░',
-            '▒░░░░░░▄▄▄░░▄██▄░░░',
-            '░░░░░░▐▀█▀▌░░░░▀█▄░',
-            '░░░░░░▐█▄█▌░░░░░░▀█▄',
-            '░░░░░░░▀▄▀░░░▄▄▄▄▄▀▀',
-            '░░░░░▄▄▄██▀▀▀▀░░░░░',
-            '░░░░█▀▄▄▄█░▀▀░░░░░░',
-            '░░░░▌░▄▄▄▐▌▀▀▀░░░░░',
-            '░▄░▐░░░▄▄░█░▀▀░░░░░',
-            '░▀█▌░░░▄░▀█▀░▀░░░░░',
-            '░░░░░░░░▄▄▐▌▄▄░░░░░',
-            '░░░░░░░░▀███▀█░▄░░░',
-            '░░░░░░░▐▌▀▄▀▄▀▐▄░░░',
-            '░░░░░░░▐▀░░░░░░▐▌░░',
-            '░░░░░░░█░░░░░░░░█░░',
-            '░░░░░░▐▌░░░░░░░░░█░']
+             '▒░░░░░░▄▄▄░░▄██▄░░░',
+             '░░░░░░▐▀█▀▌░░░░▀█▄░',
+             '░░░░░░▐█▄█▌░░░░░░▀█▄',
+             '░░░░░░░▀▄▀░░░▄▄▄▄▄▀▀',
+             '░░░░░▄▄▄██▀▀▀▀░░░░░',
+             '░░░░█▀▄▄▄█░▀▀░░░░░░',
+             '░░░░▌░▄▄▄▐▌▀▀▀░░░░░',
+             '░▄░▐░░░▄▄░█░▀▀░░░░░',
+             '░▀█▌░░░▄░▀█▀░▀░░░░░',
+             '░░░░░░░░▄▄▐▌▄▄░░░░░',
+             '░░░░░░░░▀███▀█░▄░░░',
+             '░░░░░░░▐▌▀▄▀▄▀▐▄░░░',
+             '░░░░░░░▐▀░░░░░░▐▌░░',
+             '░░░░░░░█░░░░░░░░█░░',
+             '░░░░░░▐▌░░░░░░░░░█░']
 
 SPOOKY_RE = (r"\bgentle spooks\b", re.I)
 
@@ -37,11 +42,11 @@ def spooky_spam(conn, chan):
 
 @hook.command('ow')
 def open_windows(inp, conn=None, chan=None):
-    open_windows =  os.popen('DISPLAY=:0 wmctrl -l').readlines()
+    open_windows = os.popen('DISPLAY=:0 wmctrl -l').readlines()
     if len(open_windows) == 0:
         return 'No open windows'
     for line in open_windows:
-        title = line.split('ATXBawt')[1]
+        title = line.split(HOSTNAME)[1]
         send(conn, chan, title)
 
 
@@ -49,9 +54,9 @@ def open_windows(inp, conn=None, chan=None):
 def close_window(inp):
     target = inp.lower().strip()
     if target == 'all':
-        open_windows =  os.popen('DISPLAY=:0 wmctrl -l').readlines()
+        open_windows = os.popen('DISPLAY=:0 wmctrl -l').readlines()
         for line in open_windows:
-            hex_val = line.split('0 ATXBawt')[0].strip()
+            hex_val = line.split('0 %s' % HOSTNAME)[0].strip()
             os.popen('DISPLAY=:0 wmctrl -ic "%s"' % hex_val)
         return 'Closing all windows'
     else:
@@ -61,7 +66,7 @@ def close_window(inp):
 
 @hook.command('ls')
 def launch_site(inp):
-    os.popen('DISPLAY=:0 chromium-browser -new-window %s &' % inp)
+    os.popen('DISPLAY=:0 %s -new-window %s &' % (CHROME_CMD, inp))
     return 'Launching site %s' % inp
 
 
@@ -69,7 +74,7 @@ def launch_site(inp):
 def launch_youtube(inp):
     url_pieces = inp.split('/watch')
     new_url = '%s/tv#/watch%s' % (url_pieces[0], url_pieces[1])
-    os.popen('DISPLAY=:0 chromium-browser -new-window %s &' % new_url)
+    os.popen('DISPLAY=:0 %s -new-window %s &' % (CHROME_CMD, new_url))
     return 'Launching YouTube in TV MODE'
 
 
@@ -81,7 +86,8 @@ def focus_window(inp):
 
 @hook.command('max')
 def maximize_window(inp):
-    os.popen('DISPLAY=:0 wmctrl -r :ACTIVE: -b toggle,maximized_vert,maximized_horz &')
+    os.popen(('DISPLAY=:0 wmctrl -r :ACTIVE: -b '
+              'toggle,maximized_vert,maximized_horz &'))
     return 'Maximizing current window'
 
 
@@ -94,5 +100,5 @@ def key_press(inp):
 @hook.regex(*SPOOKY_RE)
 def gentle_doot(match, conn=None, chan=None):
     spooks = 'https://youtu.be/dMXBwKOfULY'
-    os.popen('DISPLAY=:0 chromium-browser -new-window %s &' % spooks)
+    os.popen('DISPLAY=:0 %s -new-window %s &' % (CHROME_CMD, spooks))
     spooky_spam(conn, chan)
