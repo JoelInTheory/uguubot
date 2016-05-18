@@ -7,6 +7,7 @@ from util import hook
 
 # TODO: make this autodetect either google-chrome or chromium-browser
 CHROME_CMD = 'google-chrome'
+HANGOUT_URL = 'h.clev.club'
 HOSTNAME = socket.gethostname()
 MRSKELTAL = ['▒▒▒░░░░░░░░░░▄▐░░░░',
              '▒░░░░░░▄▄▄░░▄██▄░░░',
@@ -40,9 +41,19 @@ def spooky_spam(conn, chan):
         time.sleep(.3)
 
 
+def check_windows(title=None):
+    open_windows = os.popen('DISPLAY=:0 wmctrl -l').readlines()
+    if not title:
+        return open_windows
+    for win in open_windows:
+        if title in win:
+            return True
+    return False
+
+
 @hook.command('ow')
 def open_windows(inp, conn=None, chan=None):
-    open_windows = os.popen('DISPLAY=:0 wmctrl -l').readlines()
+    open_windows = check_windows()
     if len(open_windows) == 0:
         return 'No open windows'
     for line in open_windows:
@@ -53,11 +64,14 @@ def open_windows(inp, conn=None, chan=None):
 @hook.command('cw')
 def close_window(inp):
     target = inp.lower().strip()
+    if not target:
+        return 'Please specify window to close'
     if target == 'all':
         open_windows = os.popen('DISPLAY=:0 wmctrl -l').readlines()
         for line in open_windows:
-            hex_val = line.split('0 %s' % HOSTNAME)[0].strip()
-            os.popen('DISPLAY=:0 wmctrl -ic "%s"' % hex_val)
+            if 'Google Hangouts' not in line:
+                hex_val = line.split('0 %s' % HOSTNAME)[0].strip()
+                os.popen('DISPLAY=:0 wmctrl -ic "%s"' % hex_val)
         return 'Closing all windows'
     else:
         os.popen('DISPLAY=:0 wmctrl -c "%s"' % target)
@@ -102,3 +116,26 @@ def gentle_doot(match, conn=None, chan=None):
     spooks = 'https://youtu.be/dMXBwKOfULY'
     os.popen('DISPLAY=:0 %s -new-window %s &' % (CHROME_CMD, spooks))
     spooky_spam(conn, chan)
+
+
+@hook.command('hstart')
+def hangout_start(inp):
+    if check_windows('Google Hangouts'):
+        return 'Hangouts is already running'
+    os.popen('DISPLAY=:0 %s -new-window %s &' % (CHROME_CMD, HANGOUT_URL))
+    return 'Starting Hangouts'
+
+
+@hook.command('hkill')
+def hangout_kill(inp):
+    if not check_windows('Google Hangouts'):
+        return 'Hangouts is not running'
+    os.popen('DISPLAY=:0 wmctrl -c Google Hangouts')
+    return 'Killing hangouts'
+
+
+@hook.command('hstatus')
+def hangout_status(inp):
+    if not check_windows('Google Hangouts'):
+        return 'Hangouts is not running'
+    return 'Hangouts is running'
