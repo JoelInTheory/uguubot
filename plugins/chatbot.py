@@ -196,4 +196,4 @@ chatbot_re = (r'((?:%s|%s)\s(.+)|(.+)\s(?:%s|%s))'%(short_bot_name,bot_name,shor
 def chatbot(inp, reply=None, bot=None):
     thought = inp.group(1).replace(bot_name,'').replace(short_bot_name,'').replace('ALICE','Dawng').strip()
     response = botsession.think(thought)
-    reply(response.replace('Bartender Katie','Dawng').replace('ALICE','DAWNG~~~').replace('Daisy Picnic','infinity').replace('ELVIS','infinity').replace('<br> ','').replace('German Alice','urmom').replace('Dancing Alice','infinity').replace('Www.AliceBot.Org','uguubot.com').replace('alicebot','uguubot')  )
+    reply(response.replace('Bartender Katie','Dawng').replace('ALICE','DAWNG~~~').replace('Daisy Picnic','infinity').replace('ELVIS','infinity').replace('<br> ','').replace('German Alice','urmom').replace('Dancing Alice','infinity').replace('Www.AliceBot.Org','uguubot.com').replace('alicebot','uguubot').replace('Hello there. would you like a drink? Click on me for a selection :).', 'ohai.')  )
